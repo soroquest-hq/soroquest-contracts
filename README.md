@@ -1,34 +1,37 @@
-# soroquest-contracts
+# SoroQuest Contracts
 
-Soroban smart contracts for the SoroQuest bounty platform.
+[![CI](https://github.com/soroquest-hq/soroquest-contracts/actions/workflows/ci.yml/badge.svg)](https://github.com/soroquest-hq/soroquest-contracts/actions/workflows/ci.yml)
 
-## Overview
+The SoroQuest smart contract is an escrow system for managing bounties on the Stellar network. It holds USDC deposits securely until work is completed or the bounty is cancelled.
 
-This repo contains the `soroquest-escrow` contract — the on-chain source of truth
-for all bounties. It holds USDC in escrow and releases it when work is approved.
+## Prerequisites
 
-## Quick start
+- Rust toolchain (`rustup`)
+- `wasm32-unknown-unknown` target (`rustup target add wasm32-unknown-unknown`)
+- Stellar CLI (`cargo install --locked stellar-cli --features opt`)
+
+## Building and Testing
+
+To build the contract into a WebAssembly binary:
 
 ```bash
-# Build
-make build
-
-# Test
-make test
-
-# Deploy to testnet
-make deploy-testnet
+stellar contract build
 ```
 
-## Contract addresses
+To run the full test suite:
 
-- Testnet: see `deployments/testnet.json`
-- Mainnet: see `deployments/mainnet.json`
+```bash
+cargo test
+```
 
-## Architecture
+## Documentation
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for full design documentation.
+- [Architecture](docs/architecture.md): High-level design and storage layout.
+- [Contract Reference](docs/contract-reference.md): Public functions and errors.
 
-## License
+## Deployed Addresses
 
-MIT
+| Network | Address | Explorer |
+|---------|---------|----------|
+| Testnet | (Pending deployment) | [Stellar Expert](https://stellar.expert/explorer/testnet) |
+| Mainnet | (Pending deployment) | [Stellar Expert](https://stellar.expert/explorer/public) |

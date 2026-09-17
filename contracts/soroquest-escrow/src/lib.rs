@@ -169,6 +169,7 @@ impl SoroQuestEscrow {
         offset: u64,
         limit: u64,
     ) -> Vec<Bounty> {
+        let limit = if limit > 50 { 50 } else { limit };
         let count = get_bounty_count(&env);
         let mut results = Vec::new(&env);
         let mut skipped = 0u64;
