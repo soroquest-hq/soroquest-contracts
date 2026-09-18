@@ -6,12 +6,12 @@ pub fn emit_bounty_posted(
     bounty_id: u64,
     owner: &Address,
     amount: i128,
-    token: &Address,
+    token_address: &Address,
     claim_deadline: u64,
 ) {
     env.events().publish(
         (symbol_short!("posted"), bounty_id),
-        (owner.clone(), amount, token.clone(), claim_deadline),
+        (owner.clone(), amount, token_address.clone(), claim_deadline),
     );
 }
 

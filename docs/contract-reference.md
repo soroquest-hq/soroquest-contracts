@@ -34,7 +34,7 @@ Posts a new bounty and escrows the funds.
 - `title: String` — Short title of the task.
 - `description: String` — Detailed description.
 - `amount: i128` — Reward amount in the token's smallest unit (e.g., stroops).
-- `token: Address` — The contract address of the token (e.g., USDC).
+- `token_address: Address` — The contract address of the token (e.g., USDC or any Stellar Asset).
 - `claim_deadline: u64` — Ledger sequence after which the owner can unilaterally cancel a claimed bounty. Set to `0` for no deadline.
 
 **Returns:** `Result<u64, SoroQuestError>` — The new bounty ID.
@@ -51,7 +51,7 @@ stellar contract invoke \
   --title "Fix bug" \
   --description "Fix the login bug" \
   --amount 10000000 \
-  --token <USDC_CONTRACT_ID> \
+  --token_address <USDC_CONTRACT_ID> \
   --claim_deadline 0
 ```
 

@@ -17,7 +17,7 @@ pub struct SoroQuestEscrow;
 
 #[contractimpl]
 impl SoroQuestEscrow {
-    /// Post a new bounty. Transfers `amount` of `token` from `owner` into the contract.
+    /// Post a new bounty. Transfers `amount` of `token_address` from `owner` into the contract.
     /// Returns the new bounty ID.
     pub fn post_bounty(
         env: Env,
@@ -25,7 +25,7 @@ impl SoroQuestEscrow {
         title: String,
         description: String,
         amount: i128,
-        token: Address,
+        token_address: Address,
         claim_deadline: u64,
     ) -> Result<u64, SoroQuestError> {
         owner.require_auth();
@@ -37,8 +37,7 @@ impl SoroQuestEscrow {
             return Err(SoroQuestError::InvalidDeadline);
         }
 
-        // Transfer token (e.g. USDC) from owner into contract escrow.
-        let token_client = TokenClient::new(&env, &token);
+        let token_client = TokenClient::new(&env, &token_address);
         token_client.transfer(&owner, &env.current_contract_address(), &amount);
 
         let id = increment_bounty_count(&env);
@@ -48,24 +47,20 @@ impl SoroQuestEscrow {
             title,
             description,
             amount,
-            token: token.clone(),
+            token_address: token_address.clone(),
             status: BountyStatus::Open,
             claimant: None,
             created_at: env.ledger().sequence() as u64,
             claim_deadline,
         };
         save_bounty(&env, &bounty);
-        events::emit_bounty_posted(&env, id, &owner, amount, &token, claim_deadline);
+        events::emit_bounty_posted(&env, id, &owner, amount, &token_address, claim_deadline);
 
         Ok(id)
     }
 
     /// Claim an open bounty. Marks it `Claimed` and records the claimant.
-    pub fn claim_bounty(
-        env: Env,
-        claimant: Address,
-        bounty_id: u64,
-    ) -> Result<(), SoroQuestError> {
+    pub fn claim_bounty(env: Env, claimant: Address, bounty_id: u64) -> Result<(), SoroQuestError> {
         claimant.require_auth();
 
         let mut bounty = get_bounty(&env, bounty_id)?;
@@ -73,7 +68,6 @@ impl SoroQuestEscrow {
         if bounty.status != BountyStatus::Open {
             return Err(SoroQuestError::BountyNotOpen);
         }
-        // Owner cannot claim their own bounty.
         if bounty.owner == claimant {
             return Err(SoroQuestError::NotOwner);
         }
@@ -104,7 +98,7 @@ impl SoroQuestEscrow {
         }
 
         let claimant = bounty.claimant.clone().unwrap();
-        let token_client = TokenClient::new(&env, &bounty.token);
+        let token_client = TokenClient::new(&env, &bounty.token_address);
         token_client.transfer(&env.current_contract_address(), &claimant, &bounty.amount);
 
         bounty.status = BountyStatus::Completed;
@@ -119,11 +113,7 @@ impl SoroQuestEscrow {
     /// Allowed when:
     /// - Status is `Open` (always).
     /// - Status is `Claimed` and `claim_deadline` has passed.
-    pub fn cancel_bounty(
-        env: Env,
-        owner: Address,
-        bounty_id: u64,
-    ) -> Result<(), SoroQuestError> {
+    pub fn cancel_bounty(env: Env, owner: Address, bounty_id: u64) -> Result<(), SoroQuestError> {
         owner.require_auth();
 
         let mut bounty = get_bounty(&env, bounty_id)?;
@@ -133,18 +123,17 @@ impl SoroQuestEscrow {
         }
 
         match bounty.status {
-            BountyStatus::Open => {} // always cancellable
+            BountyStatus::Open => {}
             BountyStatus::Claimed => {
-                // Only cancellable once the deadline has passed.
                 let deadline = bounty.claim_deadline;
-                if deadline == 0 || env.ledger().sequence() as u64 <= deadline {
+                if deadline != 0 && env.ledger().sequence() as u64 <= deadline {
                     return Err(SoroQuestError::DeadlineNotPassed);
                 }
             }
             _ => return Err(SoroQuestError::BountyNotOpen),
         }
 
-        let token_client = TokenClient::new(&env, &bounty.token);
+        let token_client = TokenClient::new(&env, &bounty.token_address);
         token_client.transfer(&env.current_contract_address(), &owner, &bounty.amount);
 
         bounty.status = BountyStatus::Cancelled;
