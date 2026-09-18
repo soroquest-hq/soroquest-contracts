@@ -1,5 +1,5 @@
-use soroban_sdk::{contracttype, Address, Env, String};
 use crate::error::SoroQuestError;
+use soroban_sdk::{contracttype, Address, Env, String};
 
 /// Current lifecycle state of a bounty.
 #[contracttype]
@@ -20,7 +20,7 @@ pub struct Bounty {
     pub title: String,
     pub description: String,
     pub amount: i128,
-    pub token: Address,
+    pub token_address: Address,
     pub status: BountyStatus,
     pub claimant: Option<Address>,
     pub created_at: u64,
@@ -53,9 +53,11 @@ pub fn increment_bounty_count(env: &Env) -> u64 {
     env.storage()
         .persistent()
         .set(&StorageKey::BountyCount, &count);
-    env.storage()
-        .persistent()
-        .extend_ttl(&StorageKey::BountyCount, LEDGER_TTL_EXTENSION, LEDGER_TTL_EXTENSION);
+    env.storage().persistent().extend_ttl(
+        &StorageKey::BountyCount,
+        LEDGER_TTL_EXTENSION,
+        LEDGER_TTL_EXTENSION,
+    );
     count
 }
 
@@ -70,11 +72,9 @@ pub fn save_bounty(env: &Env, bounty: &Bounty) {
     env.storage()
         .persistent()
         .set(&StorageKey::Bounty(bounty.id), bounty);
-    env.storage()
-        .persistent()
-        .extend_ttl(
-            &StorageKey::Bounty(bounty.id),
-            LEDGER_TTL_EXTENSION,
-            LEDGER_TTL_EXTENSION,
-        );
+    env.storage().persistent().extend_ttl(
+        &StorageKey::Bounty(bounty.id),
+        LEDGER_TTL_EXTENSION,
+        LEDGER_TTL_EXTENSION,
+    );
 }
