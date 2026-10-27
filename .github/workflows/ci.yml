@@ -20,10 +20,10 @@ jobs:
           components: clippy, rustfmt
 
       - name: Build
-        run: cargo build
+        run: cargo build --locked
 
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --locked -- -D warnings
 
       - name: Run unit & integration tests
-        run: cargo test
+        run: cargo test --locked
