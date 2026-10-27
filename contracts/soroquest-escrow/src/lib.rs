@@ -135,9 +135,9 @@ impl SoroQuestEscrow {
         match bounty.status {
             BountyStatus::Open => {} // always cancellable
             BountyStatus::Claimed => {
-                // Only cancellable once the deadline has passed.
+                // Only cancellable once the deadline has passed (if a deadline was set).
                 let deadline = bounty.claim_deadline;
-                if deadline == 0 || env.ledger().sequence() as u64 <= deadline {
+                if deadline > 0 && env.ledger().sequence() as u64 <= deadline {
                     return Err(SoroQuestError::DeadlineNotPassed);
                 }
             }
