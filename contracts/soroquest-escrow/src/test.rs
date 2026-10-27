@@ -9,7 +9,7 @@ use soroban_sdk::{
         Client as TokenClient,
         StellarAssetClient as TokenAdminClient,
     },
-    Address, Env, String, vec,
+    Address, Env, String,
 };
 
 fn create_token<'a>(env: &'a Env, admin: &Address) -> (TokenClient<'a>, TokenAdminClient<'a>) {
@@ -275,17 +275,17 @@ fn test_events() {
         &0,
     );
 
-    let post_events = env.events().all();
+    let post_events: std::vec::Vec<_> = env.events().all().into_iter().filter(|e| e.0 == client.address).collect();
     assert_eq!(post_events.len(), 1);
     
     // 2. Claim Event
     client.claim_bounty(&claimant, &id);
-    let claim_events = env.events().all();
+    let claim_events: std::vec::Vec<_> = env.events().all().into_iter().filter(|e| e.0 == client.address).collect();
     assert_eq!(claim_events.len(), 2);
 
     // 3. Approve Event
     client.approve_completion(&owner, &id);
-    let approve_events = env.events().all();
+    let approve_events: std::vec::Vec<_> = env.events().all().into_iter().filter(|e| e.0 == client.address).collect();
     assert_eq!(approve_events.len(), 3);
 
     // 4. Cancel Event (needs a new bounty)
@@ -299,7 +299,7 @@ fn test_events() {
     );
     client.cancel_bounty(&owner, &id2);
     
-    let cancel_events = env.events().all();
+    let cancel_events: std::vec::Vec<_> = env.events().all().into_iter().filter(|e| e.0 == client.address).collect();
     assert_eq!(cancel_events.len(), 5);
 }
 
