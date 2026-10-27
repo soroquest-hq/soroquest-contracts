@@ -33,5 +33,5 @@ cargo test
 
 | Network | Address | Explorer |
 |---------|---------|----------|
-| Testnet | (Pending deployment) | [Stellar Expert](https://stellar.expert/explorer/testnet) |
+| Testnet | `CA7C6LGWPTZVUTZX7EXJVLWCQG6DVWPROBPO3FGXYKEY4W5H4HRPO5UV` | [Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA7C6LGWPTZVUTZX7EXJVLWCQG6DVWPROBPO3FGXYKEY4W5H4HRPO5UV) |
 | Mainnet | (Pending deployment) | [Stellar Expert](https://stellar.expert/explorer/public) |
