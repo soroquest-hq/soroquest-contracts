@@ -28,3 +28,6 @@ jobs:
 
       - name: Run unit & integration tests
         run: cargo test --locked
+
+      - name: Build WASM contract target
+        run: cargo build --target wasm32v1-none --release --locked
