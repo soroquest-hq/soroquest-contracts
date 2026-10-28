@@ -399,3 +399,45 @@ fn test_list_bounties_limit() {
     let results = client.list_bounties(&None, &0, &100);
     assert_eq!(results.len(), 50); // Should be clamped to 50
 }
+
+#[test]
+fn test_balance_conservation_invariant() {
+    let (env, client) = setup();
+    let admin = Address::generate(&env);
+    let owner = Address::generate(&env);
+    let claimant = Address::generate(&env);
+    let (token, token_admin) = create_token(&env, &admin);
+
+    let initial_mint: i128 = 50_000;
+    token_admin.mint(&owner, &initial_mint);
+
+    let get_total = || -> i128 {
+        token.balance(&owner) + token.balance(&claimant) + token.balance(&client.address)
+    };
+
+    assert_eq!(get_total(), initial_mint);
+
+    // 1. Post bounty
+    let amount: i128 = 10_000;
+    let id = client.post_bounty(
+        &owner,
+        &String::from_str(&env, "Invariant Task"),
+        &String::from_str(&env, "Verifying balance conservation"),
+        &amount,
+        &token.address,
+        &100,
+    );
+    assert_eq!(token.balance(&client.address), amount);
+    assert_eq!(get_total(), initial_mint);
+
+    // 2. Claim bounty
+    client.claim_bounty(&claimant, &id);
+    assert_eq!(token.balance(&client.address), amount);
+    assert_eq!(get_total(), initial_mint);
+
+    // 3. Approve completion
+    client.approve_completion(&owner, &id);
+    assert_eq!(token.balance(&client.address), 0);
+    assert_eq!(token.balance(&claimant), amount);
+    assert_eq!(get_total(), initial_mint);
+}
